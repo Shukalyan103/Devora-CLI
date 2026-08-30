@@ -1,0 +1,23 @@
+{
+  "name": "devora-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "Cli": {
+    "devora": "./Cli/devora.js"
+  },
+  "scripts": {
+    "start": "node Cli/devora.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.58",
+    "@clack/prompts": "^1.7.0",
+    "ai": "^7.0.85",
+    "dotenv": "^17.4.2",
+    "figlet": "^1.11.4"
+  }
+}
