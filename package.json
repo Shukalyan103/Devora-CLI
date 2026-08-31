@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
-  "Cli": {
+  "bin": {
     "devora": "./Cli/devora.js"
   },
   "scripts": {
@@ -17,6 +17,7 @@
     "@ai-sdk/google": "^4.0.58",
     "@clack/prompts": "^1.7.0",
     "ai": "^7.0.85",
+    "chalk": "^6.0.0",
     "dotenv": "^17.4.2",
     "figlet": "^1.11.4"
   }
