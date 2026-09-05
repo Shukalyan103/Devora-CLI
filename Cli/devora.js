@@ -1,53 +1,30 @@
-#!/usr/bin/env node
-
-import "dotenv/config";
-import readline from "node:readline"
-import { runAgent } from "../aiconfig/ai.config.js";
-import { banner, printBannerWithShadow } from "../tui/banner.js";
-import figlet from "figlet";
-import { cancel, intro,isCancel,spinner,text } from "@clack/prompts";
-import chalk from "chalk";
+import { Command } from "commander";
+import  {runCli } from "../tui/wakeup.js";
 
 
 
-banner();
 
-const args = process.argv.slice(2)
 
-let promt ;
+const program = new Command();
 
-if(args.length >0){
-    promt = args.join(" ")
-}else{
-    
 
-    let answer = await text({
-      message:"what you want me to do",
-      placeholder:"explain java script"
+program
+  .name("devora")
+  .description("Devora CLI ")
+  .version("1.0.0")
+   .action(async () => {
+       await runCli()
+    })
+  
+
+
+  program
+    .command("cli")
+    .description("show the banner and pick cli or telegram mode")
+    .action(async () => {
+       await runCli()
     })
 
-    if(isCancel(answer)){
-      cancel("Operation Canceled")
-    }
-    promt = answer;
-
-    let s = spinner();
-
-    try{
-      s.start("Devora is thinking ....")
-      const response = await runAgent(promt)
-      if(response){
-        s.stop(chalk.dim("Got It"))
-        console.log(chalk.bgGray(response))
-
-      }
-
-    }catch(err){
-
-      console.log(chalk.bgRed("Some Things went wrong"))
-      console.log(err)
-        process.exit(1)
-    }
-}
 
 
+  await program.parseAsync(process.argv)
