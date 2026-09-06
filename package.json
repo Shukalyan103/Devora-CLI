@@ -16,12 +16,14 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.58",
     "@clack/prompts": "^1.7.0",
+    "@openrouter/ai-sdk-provider": "^3.0.0",
     "ai": "^7.0.85",
     "chalk": "^6.0.0",
     "commander": "^15.0.0",
     "dotenv": "^17.4.2",
     "figlet": "^1.11.4",
     "marked": "^15.0.12",
-    "marked-terminal": "^7.3.0"
+    "marked-terminal": "^7.3.0",
+    "zod": "^4.5.4"
   }
 }

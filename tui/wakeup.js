@@ -4,6 +4,7 @@ import { banner, printBannerWithShadow } from "./banner.js";
 import chalk from "chalk";
 import { isCancel, select } from "@clack/prompts";
 import { normalAsk } from "../chat/normalAsk.js";
+import { cli } from "../mode/CLi.js";
 
 
 export async function runCli() {
@@ -29,7 +30,7 @@ banner();
     }
 
     if(mode === 'cli'){
-        console.log("cli")
+       cli()
     }
     if(mode === 'chat'){
        normalAsk()
