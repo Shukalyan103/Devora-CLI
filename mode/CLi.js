@@ -1,3 +1,4 @@
+import { agentTask } from "./agent/agentTask.js";
 import { startChat } from "./ask/ask.js";
 import { isCancel, select } from "@clack/prompts";
 
@@ -17,6 +18,7 @@ export const cli= async()=>{
 
         ]
     });
+    //  how to intergrat judge0 with this project give me step by step guide
 
     if(isCancel(mode) || mode ==='exit'){
         console.log("Good bye.....")
@@ -27,7 +29,7 @@ export const cli= async()=>{
         startChat()
     }
     if(mode === 'agent'){
-        console.log("Agent")
+      agentTask()
 
     }
     if(mode === 'planner'){

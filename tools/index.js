@@ -4,19 +4,56 @@ import {
   writeFile
 } from "./filesystem.js";
 
+
 import {
   runCommand
 } from "./terminal.js";
+import { trackTool } from "../actions/trackTools.js";
 
 
-export const tools = {
+export const Agenttools = (tracker) => {
+  return {
 
-  list_files: listFiles,
 
-  read_file: readFile,
 
-  write_file: writeFile,
+    list_files: trackTool(
+      "list_files",
+      listFiles,
+      tracker
+    ),
 
-  run_command: runCommand
+    read_file: trackTool(
+      "read_file",
+      readFile,
+      tracker
+    ),
 
+    write_file: trackTool(
+      "write_file",
+      writeFile,
+      tracker
+    ),
+
+    run_command: trackTool(
+      "run_command",
+      runCommand,
+      tracker
+    )
+  }
+};
+
+export const Asktools = (tracker) => {
+  return {
+    list_files: trackTool(
+      "list_files",
+      listFiles,
+      tracker
+    ),
+
+    read_file: trackTool(
+      "read_file",
+      readFile,
+      tracker
+    ),
+  }
 };

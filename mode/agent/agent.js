@@ -6,7 +6,7 @@ import {
 
 
 import {
-  tools
+  Agenttools
 } from "../../tools/index.js";
 
 
@@ -16,6 +16,8 @@ import {
 
 
 const model = getAgentModel()
+const tools = Agenttools
+
 export async function runAgent(
   prompt,
  

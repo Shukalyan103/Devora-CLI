@@ -5,32 +5,26 @@ import {
   spinner
 } from "@clack/prompts";
 
-import { runAgent } from "../agent/agent.js";
+import { runAgent } from "./AskAgent.js";
 import { renderTerminalMardown } from "../../tui/terminal_markdown.js";
+import { logAction } from "../../actions/actionLogger.js";
 
 
 
 export async function startChat() {
 
-  
 
-  console.log(
-    "\n🤖 Devora Agent"
-  );
 
-  console.log(
-    "Type 'exit' to quit.\n"
-  );
 
 
   while (true) {
-
     const answer = await text({
-      message: "devora"
-    });
+      message: "What would you like to ask Devora 🤖?",
+      placeholder: "Ask a question about your folder or project",
+    })
 
 
-    if (isCancel(answer)) {
+    if (isCancel(answer) || answer === "exit" || answer === "quit ") {
 
       cancel("Chat cancelled.");
 
@@ -71,7 +65,13 @@ export async function startChat() {
 
       const response = await runAgent(
         prompt,
-        
+        {
+          onAction: (event) => {
+
+            logAction(event);
+          }
+        }
+
       );
 
 
@@ -85,12 +85,15 @@ export async function startChat() {
       );
 
 
+      // console.log(
+      //   renderTerminalMardown(response)
+      // );
       console.log(
-        renderTerminalMardown(response)
+        renderTerminalMardown(response.text)
       );
 
 
-      
+
 
 
     } catch (error) {
