@@ -13,18 +13,27 @@ import {
 import {
   getAgentModel
 } from "../../aiconfig/ai.js"
+import { createActionTracker } from "../../actions/index.js";
 
 
 const model = getAgentModel()
-const tools = Agenttools
 
 export async function runAgent(
   prompt,
+  option
  
 ) {
    
 
   try {
+
+    const tracker = createActionTracker();
+
+    if(option.onAction){
+      tracker.subscribe(option.onAction);
+    }
+    const tools = Agenttools(tracker)
+
 
     const result = await generateText({
 
@@ -75,7 +84,10 @@ Rules:
 
     });
 
-    return result.text;
+    return{
+      text: result.text,
+      actions: tracker.getActions()
+    }
 
   } catch (error) {
 

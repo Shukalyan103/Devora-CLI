@@ -6,7 +6,7 @@ import {
 
 
 import {
-Asktools
+  Asktools
 } from "../../tools/index.js";
 
 
@@ -21,13 +21,13 @@ export async function runAgent(
   prompt,
   option
 ) {
-   
+
 
   try {
 
     const tracker = createActionTracker();
-    
-    if(option.onAction){
+
+    if (option.onAction) {
       tracker.subscribe(option.onAction);
     }
 
@@ -68,10 +68,10 @@ Use list_files and read_file to inspect the workspace before answering questions
 
     });
 
-    return { 
-      text: result.text ,
-       actions: tracker.getActions()
-     };
+    return {
+      text: result.text,
+      actions: tracker.getActions()
+    };
 
   } catch (error) {
 

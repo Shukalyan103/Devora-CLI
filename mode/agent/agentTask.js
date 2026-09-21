@@ -7,6 +7,7 @@ import {
 
 import { runAgent } from "./agent.js";
 import { renderTerminalMardown } from "../../tui/terminal_markdown.js";
+import { logAction } from "../../actions/actionLogger.js";
 
 
 
@@ -27,7 +28,7 @@ export async function agentTask() {
 
             cancel("Chat cancelled.");
 
-            break;
+           return
         }
 
 
@@ -48,7 +49,7 @@ export async function agentTask() {
                 "\n👋 Goodbye!\n"
             );
 
-            break;
+            return
         }
 
 
@@ -64,6 +65,11 @@ export async function agentTask() {
 
             const response = await runAgent(
                 prompt,
+               {
+                onAction: (event)=>{
+                  logAction(event);
+                }
+               }
 
             );
 
@@ -79,7 +85,7 @@ export async function agentTask() {
 
 
             console.log(
-                renderTerminalMardown(response)
+                renderTerminalMardown(response.text)
             );
 
 

@@ -28,7 +28,7 @@ export async function startChat() {
 
       cancel("Chat cancelled.");
 
-      break;
+      return
     }
 
 
@@ -49,7 +49,7 @@ export async function startChat() {
         "\n👋 Goodbye!\n"
       );
 
-      break;
+     return
     }
 
 
