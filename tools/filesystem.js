@@ -121,3 +121,20 @@ Always read an existing file before overwriting it.
     };
   }
 });
+
+export const deleteFile = tool({
+  //description that what this tool does
+  description :"Delete a file from the workspace.",
+  // schema for the input of the tool
+  inputSchema:z.object({
+    path:z.string().describe(
+      "relative path of the file to delete"
+    )
+  }),
+// logi  for the tool that how it is excecting 
+ execute: async ({ path: filePath }) => {
+    const fullPath = getSafePath(filePath);
+    await fs.unlink(fullPath);
+    return { success: true, message: `Deleted ${filePath}` };
+  }
+})

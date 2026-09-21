@@ -1,4 +1,5 @@
 import {
+  deleteFile,
   listFiles,
   readFile,
   writeFile
@@ -37,6 +38,12 @@ export const Agenttools = (tracker) => {
     run_command: trackTool(
       "run_command",
       runCommand,
+      tracker
+    ),
+
+    delete_file: trackTool(
+      "delete_file",
+      deleteFile,
       tracker
     )
   }
