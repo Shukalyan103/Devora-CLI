@@ -8,6 +8,7 @@ import {
 import { runAgent } from "./agent.js";
 import { renderTerminalMardown } from "../../tui/terminal_markdown.js";
 import { logAction } from "../../actions/actionLogger.js";
+import { runOrchestrator } from "../../orchestrator/orchestrator.js";
 
 
 
@@ -28,7 +29,7 @@ export async function agentTask() {
 
             cancel("Chat cancelled.");
 
-           return
+            return
         }
 
 
@@ -58,19 +59,67 @@ export async function agentTask() {
 
         try {
 
-            s.start(
-                "Devora is working..."
-            );
+            // s.start(
+            //     "Devora is working..."
+            // );
 
 
-            const response = await runAgent(
+            // const response = await runAgent(
+            //     prompt,
+            //    {
+            //     onAction: (event)=>{
+            //       logAction(event);
+            //     }
+            //    }
+
+            // );
+
+            const result = await runOrchestrator(
                 prompt,
-               {
-                onAction: (event)=>{
-                  logAction(event);
-                }
-               }
+                {
+                    onPlan(tasks) {
+                        s.stop("Plan created");
 
+                        console.log("\n📋 Plan\n");
+
+                        tasks.forEach((task, index) => {
+                            console.log(
+                                `  ${index + 1}. ${task.title}`
+                            );
+                        });
+
+                        console.log();
+                    },
+
+                    onTaskStart(task) {
+                        console.log(
+                            `▶ ${task.title}`
+                        );
+                    },
+
+                    onTaskComplete(task) {
+                        console.log(
+                            `✓ ${task.title}\n`
+                        );
+                    },
+
+                    onTaskFailed(task, error) {
+                        console.log(
+                            `✗ ${task.title}`
+                        );
+
+                        console.log(
+                            `  ${error.message}\n`
+                        );
+                    },
+
+                    onAction(actionEvent) {
+                        {
+                            logAction(actionEvent);
+
+                        }
+                    }
+                }
             );
 
 

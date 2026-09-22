@@ -20,7 +20,7 @@ const model = getAgentModel()
 
 export async function runAgent(
   prompt,
-  option
+  option={}
  
 ) {
    
