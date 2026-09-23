@@ -1,7 +1,11 @@
 import {
+  analyzeCodebase,
+  createFile,
+  createFolder,
   deleteFile,
   listFiles,
   readFile,
+  searchFiles,
   writeFile
 } from "./filesystem.js";
 
@@ -45,6 +49,29 @@ export const Agenttools = (tracker) => {
       "delete_file",
       deleteFile,
       tracker
+    ),
+
+    create_file: trackTool(
+      "create_file",
+      createFile,
+      tracker
+    ),
+
+    create_folder: trackTool(
+      "create_folder",
+      createFolder,
+      tracker
+    ),
+
+    search_files: trackTool(
+      "search_files",
+      searchFiles,
+      tracker
+    ),
+    analyze_codebase: trackTool(
+      "analyze_codebase",
+      analyzeCodebase,
+      tracker
     )
   }
 };
@@ -62,5 +89,15 @@ export const Asktools = (tracker) => {
       readFile,
       tracker
     ),
+    search_files: trackTool(
+      "search_files",
+      searchFiles,
+      tracker
+    ),
+    analyze_codebase: trackTool(
+      "analyze_codebase",
+      analyzeCodebase,
+      tracker
+    )
   }
 };
