@@ -1,30 +1,77 @@
+import { buildContext } from "../memory/contextBuilder.js";
+import { extractMemory } from "../memory/memoryExtractor.js";
 import { runAgent } from "../mode/agent/agent.js";
  
 export async function executeTask(
   task,
   {
-    
-    onAction
+    onAction,
+    memoryManager,    
+    goal,
+    completedTasks = []
   } = {}
 ) {
-  const prompt = `
-You are executing one task as part of a larger Devora plan.
+  if(!memoryManager) {
+    throw new Error("Memory manager is required");
+  }
 
-Task:
-${task.title}
 
-Description:
-${task.description}
+  const prompt = buildContext({
+    goal,
+    task,
+    projectMemory:memoryManager.getProjectMemory(),
+      
+    globalMemory:memoryManager.getGlobalMemory(),
+      
+    sessionMemory:memoryManager.getSessionMemory(),
+     completedTasks
+  });
 
-Instructions:
-- Inspect the workspace when necessary.
-- Use the available tools.
-- Actually perform the required work.
-- Do not just explain what should be done.
-- Report what you changed or verified.
-`;
 
-  return await runAgent(prompt, {
+
+ const result = await runAgent(prompt, {
     onAction
   });
+
+
+  const extractedMemory =
+    await extractMemory(
+      task,
+      result.text
+    );
+
+  await memoryManager
+    .saveExtractedMemory(
+      extractedMemory
+    );
+
+  return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//   const prompt = `
+// You are executing one task as part of a larger Devora plan.
+
+// Task:
+// ${task.title}
+
+// Description:
+// ${task.description}
+
+// Instructions:
+// - Inspect the workspace when necessary.
+// - Use the available tools.
+// - Actually perform the required work.
+// - Explain what should be done.
+// - Report what you changed or verified.
+// `;

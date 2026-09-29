@@ -1,7 +1,10 @@
+
 import { TaskManager } from "./taskManager.js";
 import { TaskQueue } from "./taskQueue.js";
 import { createPlan } from "./planner.js";
 import { executeTask } from "./executor.js";
+
+import { MemoryManager } from "../memory/MemoryManager.js";
 
 export async function runOrchestrator(
   prompt,
@@ -16,17 +19,29 @@ export async function runOrchestrator(
   const taskManager = new TaskManager();
 
   // -------------------------
-  // 1. Create plan
+  // 1. Initialize memory
+  // -------------------------
+
+  const memoryManager = new MemoryManager();
+
+  await memoryManager.initialize();
+
+  memoryManager.session.setGoal(prompt);
+
+  // -------------------------
+  // 2. Create plan
   // -------------------------
 
   const plan = await createPlan(prompt);
 
   if (!plan?.tasks?.length) {
-    throw new Error("Planner returned no tasks.");
+    throw new Error(
+      "Planner returned no tasks."
+    );
   }
 
   // -------------------------
-  // 2. Create tasks
+  // 3. Create tasks
   // -------------------------
 
   let previousTaskId = null;
@@ -35,6 +50,7 @@ export async function runOrchestrator(
     const task = taskManager.addTask({
       title: plannedTask.title,
       description: plannedTask.description,
+
       dependsOn: previousTaskId
         ? [previousTaskId]
         : []
@@ -43,20 +59,27 @@ export async function runOrchestrator(
     previousTaskId = task.id;
   }
 
-  onPlan?.(taskManager.getTasks());
+  onPlan?.(
+    taskManager.getTasks()
+  );
 
   // -------------------------
-  // 3. Create queue
+  // 4. Create queue
   // -------------------------
 
-  const queue = new TaskQueue(taskManager);
+  const queue = new TaskQueue(
+    taskManager
+  );
 
   // -------------------------
-  // 4. Execute tasks
+  // 5. Execute tasks
   // -------------------------
+
+  const completedTasks = [];
 
   while (queue.hasTasks()) {
-    const task = queue.getNextTask();
+    const task =
+      queue.getNextTask();
 
     if (!task) {
       throw new Error(
@@ -64,19 +87,34 @@ export async function runOrchestrator(
       );
     }
 
-    taskManager.startTask(task.id);
+    taskManager.startTask(
+      task.id
+    );
+
+    memoryManager.session.setCurrentTask(
+      task
+    );
 
     onTaskStart?.(task);
 
     try {
-      const result = await executeTask(task, {
-        onAction
-      });
+      const result =
+        await executeTask(task, {
+          onAction,
+          memoryManager,
+          goal: prompt,
+          completedTasks
+        });
 
       taskManager.completeTask(
         task.id,
         result
       );
+
+      completedTasks.push({
+        title: task.title,
+        result
+      });
 
       onTaskComplete?.(
         task,
@@ -98,8 +136,23 @@ export async function runOrchestrator(
     }
   }
 
+  // -------------------------
+  // 6. Return final result
+  // -------------------------
+
   return {
     tasks: taskManager.getTasks(),
-    summary: taskManager.getSummary()
+    summary: taskManager.getSummary(),
+
+    memory: {
+      project:
+        memoryManager.getProjectMemory(),
+
+      global:
+        memoryManager.getGlobalMemory(),
+
+      session:
+        memoryManager.getSessionMemory()
+    }
   };
 }

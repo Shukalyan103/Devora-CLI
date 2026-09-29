@@ -9,6 +9,9 @@ import { WORKSPACE } from "../utils/workspace.js";
 const execAsync = promisify(exec);
 
 
+
+
+
 export const runCommand = tool({
   description: `
 Run a terminal command inside the workspace.
@@ -46,7 +49,7 @@ Do not run dangerous commands.
 
       return {
         success: true,
-        stdout,
+        stdout ,
         stderr
       };
 
