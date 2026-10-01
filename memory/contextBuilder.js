@@ -1,105 +1,45 @@
-
 export function buildContext({
   goal,
   task,
   projectMemory = {},
   globalMemory = {},
-  sessionMemory = {},
   completedTasks = []
 }) {
-  const project = projectMemory.project ?? {};
+  const importantFiles = projectMemory.importantFiles ?? [];
+  const decisions = projectMemory.decisions ?? [];
+  const projectNotes = projectMemory.notes ?? [];
+  const preferences = globalMemory.preferences ?? [];
 
-  const importantFiles =
-    projectMemory.importantFiles ?? [];
-
-  const decisions =
-    projectMemory.decisions ?? [];
-
-  const projectNotes =
-    projectMemory.notes ?? [];
-
-  const preferences =
-    globalMemory.preferences ?? [];
-
-  const globalNotes =
-    globalMemory.notes ?? [];
+  // Match item.summary created in orchestrator.js
+  const completedList = completedTasks.length
+    ? completedTasks
+      .map(item => `- **${item.title}**: ${item.summary || "Completed"}`)
+      .join("\n")
+    : "None";
 
   return `
 You are Devora, an intelligent CLI software engineering agent.
 
-PROJECT MEMORY
-
-Project:
-${JSON.stringify(project, null, 2)}
-
-Important files:
-${importantFiles.join("\n") || "None"}
-
-Project decisions:
-${decisions.join("\n") || "None"}
-
-Project notes:
-${projectNotes.join("\n") || "None"}
-
-
-GLOBAL MEMORY
-
-Preferences:
-${preferences.join("\n") || "None"}
-
-Notes:
-${globalNotes.join("\n") || "None"}
-
-
-CURRENT SESSION
-
-Overall goal:
+### Goal
 ${goal ?? "Not specified"}
 
-Current task:
-${task?.title ?? "Unknown"}
-
-Task description:
+### Current Task
+**${task?.title ?? "Unknown Task"}**
 ${task?.description ?? "No description available"}
 
+### Project Context
+- **Important Files:** ${importantFiles.join(", ") || "None"}
+- **Decisions:** ${decisions.join("; ") || "None"}
+- **Notes:** ${projectNotes.join("; ") || "None"}
+${preferences.length ? `- **Preferences:** ${preferences.join("; ")}` : ""}
 
-COMPLETED TASKS
+### Completed Tasks
+${completedList}
 
-${
-  completedTasks.length
-    ? completedTasks
-        .map(
-          item => `
-- ${item.title}
-  Result: ${item.result ?? "completed"}
-`
-        )
-        .join("\n")
-    : "None"
+### Guidelines
+- Always inspect files before modifying them.
+- Prefer 'modify_file' for small changes to conserve tokens; use 'write_file' for new or full-file rewrites.
+- Execute terminal commands safely within the workspace.
+- Give concise summaries of changes made.
+`.trim();
 }
-
-
-SESSION STATE
-
-${JSON.stringify(
-  sessionMemory,
-  null,
-  2
-)}
-
-
-INSTRUCTIONS
-
-- Inspect the workspace when necessary.
-- Read existing files before modifying them.
-- Use the available tools.
-- Actually perform the required work.
-- Do not just explain what should be done.
-- Do not perform unrelated tasks.
-- Verify your work when possible.
-- Do not use destructive commands.
-- Report what you changed or verified.
-`;
-}
-
-

@@ -30,10 +30,10 @@ banner();
     }
 
     if(mode === 'cli'){
-       cli()
+       await cli()
     }
     if(mode === 'chat'){
-       normalAsk()
+      await  normalAsk()
     }
 
 

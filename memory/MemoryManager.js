@@ -15,7 +15,7 @@ export class MemoryManager {
     this.project = null;
     this.global = null;
     this.session = new SessionMemory();
-  }
+  } 
 
   async initialize() {
      this.project = await loadProjectMemory(); 
@@ -84,22 +84,26 @@ export class MemoryManager {
   }
 
   async saveExtractedMemory(memory) {
-  for (const decision of memory.decisions) {
-    await this.addProjectDecision(
-      decision
-    );
-  }
 
-  for (const file of memory.importantFiles) {
-    await this.addImportantFile(
-      file
-    );
-  }
+    if(!memory) return;
 
-  for (const note of memory.notes) {
-    await this.addProjectNote(
-      note
-    );
+ 
+  for (const decision of (memory.decisions || [])) {
+    if (!this.project.decisions.includes(decision)) {
+      this.project.decisions.push(decision);
+    }
   }
+  for (const file of (memory.importantFiles || [])) {
+    if (!this.project.importantFiles.includes(file)) {
+      this.project.importantFiles.push(file);
+    }
+  }
+  for (const note of (memory.notes || [])) {
+    if (!this.project.notes.includes(note)) {
+      this.project.notes.push(note);
+    }
+  }
+  // Single disk write
+  await saveProjectMemory(this.project);
 }
 }

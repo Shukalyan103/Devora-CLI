@@ -14,12 +14,12 @@ export const loadProjectMemory = async () => {
     } catch (error) {
         return {
             project: [],
-            decision: [],
+            decisions: [],
             importantFiles: [],
             notes: []
         }
 
-    }
+    } 
 }
 
 

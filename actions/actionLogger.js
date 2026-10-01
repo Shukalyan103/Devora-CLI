@@ -52,6 +52,16 @@ function formatAction(action) {
     case "run_command":
       return `Running: ${input.command}`;
 
+    case "search_files":
+      return `Searching : ${input.query}`;
+
+    case "create_file":
+      return `Creating File: ${input.path}`;
+
+    case "delete_file":
+      return `Deleting File: ${input.path}`;
+
+
     default:
       return `Running tool: ${toolName}`;
   }

@@ -111,11 +111,15 @@ export async function runOrchestrator(
         result
       );
 
+      const rawText = typeof result?.text === "string" ? result.text.trim() : "";
+      const firstLine = rawText.split("\n")[0] || "Completed successfully";
+      const shortSummary = firstLine.length > 150 ? firstLine.slice(0, 147) + "..." : firstLine;
+
       completedTasks.push({
         title: task.title,
-        result
+        summary: shortSummary
       });
-
+      
       onTaskComplete?.(
         task,
         result

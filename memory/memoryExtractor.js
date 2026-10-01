@@ -1,57 +1,57 @@
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
-
 import { getAgentModel } from "../aiconfig/ai.js";
+import { cleanAndParseJson } from "../utils/jsonHelper.js";
 
 const memorySchema = z.object({
-  decisions: z.array(
-    z.string()
-  ),
-
-  importantFiles: z.array(
-    z.string()
-  ),
-
-  notes: z.array(
-    z.string()
-  )
+  decisions: z.array(z.string()).default([]),
+  importantFiles: z.array(z.string()).default([]),
+  notes: z.array(z.string()).default([])
 });
 
-export async function extractMemory(
-  task,
-  result
-) {
-  const response =
-    await generateObject({
+export async function extractMemory(task, result) {
+  try {
+    const response = await generateText({
       model: getAgentModel(),
 
-      schema: memorySchema,
+      system: `You are Devora's memory system.
+Analyze this completed Devora task and extract useful information for future tasks on this project.
 
-      prompt: `
-Analyze this completed Devora task.
+CRITICAL INSTRUCTIONS:
+- You must output ONLY a valid JSON object.
+- Do NOT output any markdown fences, conversational text, explanations, or thinking tags.
+- Output structure:
+{
+  "decisions": ["string"],
+  "importantFiles": ["string"],
+  "notes": ["string"]
+}`,
 
-Task:
-${task.title}
+      prompt: `Task: ${task.title}
+Description: ${task.description}
+Result: ${result || "Task completed."}
 
-Description:
-${task.description}
-
-Result:
-${result}
-
-Extract only information that is
-likely to remain useful for future
-work on this project.
-
-Return:
-
-- architectural decisions
-- important files
-- useful project notes
-
-Do not invent information.
-`
+JSON:`
     });
 
-  return response.object;
+    const parsed = cleanAndParseJson(response.text);
+    const validated = memorySchema.safeParse(parsed);
+
+    if (validated.success) {
+      return validated.data;
+    }
+
+    return {
+      decisions: Array.isArray(parsed?.decisions) ? parsed.decisions.map(String) : [],
+      importantFiles: Array.isArray(parsed?.importantFiles) ? parsed.importantFiles.map(String) : [],
+      notes: Array.isArray(parsed?.notes) ? parsed.notes.map(String) : []
+    };
+  } catch (error) {
+    // If memory extraction fails on free models, return empty memory safely without crashing
+    return {
+      decisions: [],
+      importantFiles: [],
+      notes: []
+    };
+  }
 }

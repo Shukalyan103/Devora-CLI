@@ -8,7 +8,34 @@ import { WORKSPACE } from "../utils/workspace.js";
 
 const execAsync = promisify(exec);
 
+const DANGEROUS_PATTERNS = [
+  /rm\s+-rf\s+[\/\\]/i,
+  /rmdir\s+\/s\s+\/q\s+[c-z]:\\/i,
+  /format\s+[c-z]:/i,
+  /:(){ :|:& };:/,
+  /mkfs/i,
+  /dd\s+if=/i
+];
 
+
+const truncateOutput=(text , maxLines = 40)=>{
+    if(!text) return;
+
+    const lines = text.split("\n")
+
+    if(lines.length <= maxLines){
+      return text
+    }
+
+    const half = Math.floor(maxLines /2)
+
+    return [
+      ...lines.slice(0,half),
+      `\n... [Truncated ${lines.length - maxLines}
+      lines] ... \n`,
+      ...lines.slice(-half)
+    ].join("\n")
+}
 
 
 
@@ -36,6 +63,14 @@ Do not run dangerous commands.
 
   execute: async ({ command }) => {
 
+   
+    if (DANGEROUS_PATTERNS.some(pattern => pattern.test(command.trim()))) {
+      return {
+        success: false,
+        error: `Command rejected for security reasons: dangerous command detected.`
+      };
+    }
+
     try {
 
       const {
@@ -49,16 +84,16 @@ Do not run dangerous commands.
 
       return {
         success: true,
-        stdout ,
-        stderr
+        stdout :truncateOutput(stdout),
+        stderr:truncateOutput(stderr)
       };
 
     } catch (error) {
 
       return {
         success: false,
-        stdout: error.stdout || "",
-        stderr: error.stderr || "",
+        stdout: truncateOutput(error.stdout) || "",
+        stderr: truncateOutput(error.stderr) || "",
         error: error.message
       };
     }

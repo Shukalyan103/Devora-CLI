@@ -6,7 +6,8 @@ import {
   listFiles,
   readFile,
   searchFiles,
-  writeFile
+  writeFile,
+  modifyFile,
 } from "./filesystem.js";
 
 
@@ -72,7 +73,12 @@ export const Agenttools = (tracker) => {
       "analyze_codebase",
       analyzeCodebase,
       tracker
-    )
+    ),
+    modify_file: trackTool(
+      "modify_file",
+      modifyFile,
+      tracker
+    ),
   }
 };
 

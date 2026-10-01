@@ -8,7 +8,13 @@ import { getSafePath, WORKSPACE } from "../utils/workspace.js"
 
 const SKILLS_DIR = path.join(WORKSPACE, "skills");
 
-const ignoreList = ["node_modules", ".git", "dist"]
+const IGNORED_DIRS = new Set(["node_modules", ".git", "dist", ".next", "build", ".devora", "coverage", ".turbo"]);
+const BINARY_EXTS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".zip", ".tar", ".gz", ".exe", ".bin", ".woff", ".woff2", ".ttf", ".eot"]);
+
+
+
+
+
 
 export const listFiles = tool({
   description: `
@@ -46,34 +52,43 @@ Use this tool to inspect the project structure.
     }));
   }
 });
-
+ 
 export const readFile = tool({
   description: `
 Read the contents of a text file.
-
-Use this before modifying an existing file.
+Use startLine and endLine to read specific sections of large files.
   `,
-
   inputSchema: z.object({
     path: z
       .string()
-      .describe(
-        "Relative path of the file to read."
-      )
+      .describe("Relative path of the file to read."),
+    startLine: z
+      .number()
+      .optional()
+      .default(1)
+      .describe("Line number to start reading from (1-indexed). Defaults to 1."),
+    endLine: z
+      .number()
+      .optional()
+      .default(200)
+      .describe("Line number to stop reading at (1-indexed, inclusive). Defaults to 200.")
   }),
-
-  execute: async ({ path: filePath }) => {
-
+  execute: async ({ path: filePath, startLine = 1, endLine = 200 }) => {
     const fullPath = getSafePath(filePath);
-
-    const content = await fs.readFile(
-      fullPath,
-      "utf8"
-    );
-
+    const content = await fs.readFile(fullPath, "utf8");
+    const lines = content.split("\n");
+    const totalLines = lines.length;
+    const start = Math.max(1, startLine);
+    const end = Math.min(totalLines, endLine || totalLines);
+    const sliced = lines.slice(start - 1, end).join("\n");
     return {
       path: filePath,
-      content
+      totalLines,
+      startLine: start,
+      endLine: end,
+      content: sliced,
+      truncated: end < totalLines,
+      notice: end < totalLines ? `File has ${totalLines} lines. Use startLine=${end + 1} to read more.` : undefined
     };
   }
 });
@@ -192,18 +207,24 @@ export const modifyFile = tool({
 });
 
 // Helper: recursive file walker
-async function getFilesRecursively(dir, ignoreList = ["node_modules", ".git", "dist"]) {
+async function getFilesRecursively(dir) {
   let results = [];
+  try{
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
-    if (ignoreList.includes(entry.name)) continue;
+    if (IGNORED_DIRS.includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      results = results.concat(await getFilesRecursively(full, ignoreList));
+      results = results.concat(await getFilesRecursively(full));
     } else {
-      results.push(full);
+      const ext = path.extname(entry.name).toLowerCase();
+      if(!BINARY_EXTS.has(ext)){
+        results.push(full)
+      }
+      ;
     }
   }
+} catch{}
   return results;
 }
 

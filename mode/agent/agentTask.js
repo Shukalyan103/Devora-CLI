@@ -59,20 +59,7 @@ export async function agentTask() {
 
         try {
 
-            // s.start(
-            //     "Devora is working..."
-            // );
 
-
-            // const response = await runAgent(
-            //     prompt,
-            //    {
-            //     onAction: (event)=>{
-            //       logAction(event);
-            //     }
-            //    }
-
-            // );
 
             const result = await runOrchestrator(
                 prompt,
@@ -132,9 +119,38 @@ export async function agentTask() {
                 "\n🤖 Devora:\n"
             );
 
+            let summaryMarkdown = `### 📋 Execution Summary\n\n`;
+            summaryMarkdown += `- **Total Tasks:** ${result.summary?.total ?? result.tasks.length}\n`;
+            summaryMarkdown += `- **Completed:** ${result.summary?.completed ?? 0}\n`;
+            summaryMarkdown += `- **Failed:** ${result.summary?.failed ?? 0}\n\n`;
+
+            for (const task of result.tasks) {
+
+                const icon = task.status === "completed" ? "✓" : "✗";
+
+                summaryMarkdown += `#### ${icon} ${task.title}\n`;
+
+                if (task.result?.actions?.length) {
+                    summaryMarkdown += `**Actions Taken:**\n`;
+                    task.result.actions.forEach(act => {
+                        const detail = act.input?.path || act.input?.command || "";
+                        summaryMarkdown += `- \`${act.toolName}\` ${detail ? `(${detail})` : ""}\n`;
+                    });
+                    summaryMarkdown += `\n`;
+                }
+                // AI's conclusion / response text
+                if (task.result?.text) {
+                    summaryMarkdown += `**Result:**\n${task.result.text.trim()}\n\n`;
+                }
+                if (task.error) {
+                    summaryMarkdown += `**Error:** ${task.error}\n\n`;
+                }
+
+            }
+
 
             console.log(
-                renderTerminalMardown(response.text)
+                renderTerminalMardown(summaryMarkdown)
             );
 
 

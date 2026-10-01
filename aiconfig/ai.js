@@ -1,5 +1,4 @@
-import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+
 import "dotenv/config";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -18,7 +17,7 @@ dotenv.config({
 
 
 
-// export async function runAgent(prompt) {
+// export async function runAgentGemini(prompt) {
 //   const googleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 //   if (!googleApiKey) {
 //     throw new Error("Missing GOOGLE_API_KEY in environment variables.");
@@ -71,24 +70,28 @@ dotenv.config({
 
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
-const provider = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY
-});
-
 export function getAgentModel() {
-  const modelID = process.env.OPENROUTER_DEFAULT_MODEL;
+  const rawApiKey = process.env.OPENROUTER_API_KEY;
+  const rawModelID = process.env.OPENROUTER_DEFAULT_MODEL;
 
-  if (!process.env.OPENROUTER_API_KEY) {
+  if (!rawApiKey) {
     throw new Error(
       "OPENROUTER_API_KEY is missing in .env"
     );
   }
 
-  if (!modelID) {
+  if (!rawModelID) {
     throw new Error(
       "OPENROUTER_DEFAULT_MODEL is missing in .env"
     );
   }
+
+  const apiKey = rawApiKey.trim().replace(/^['"]|['"]$/g, "");
+  const modelID = rawModelID.trim().replace(/^['"]|['"]$/g, "");
+
+  const provider = createOpenRouter({
+    apiKey
+  });
 
   return provider(modelID);
 }

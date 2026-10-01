@@ -16,15 +16,12 @@ import {
 import { createActionTracker } from "../../actions/index.js";
 
 
-const model = getAgentModel()
 export async function runAgent(
   prompt,
   option
 ) {
-
-
   try {
-
+    const model = getAgentModel();
     const tracker = createActionTracker();
 
     if (option.onAction) {
